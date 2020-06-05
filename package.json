@@ -1,0 +1,17 @@
+{
+  "name": "drawio-export-puppeteer",
+  "version": "0.1.0",
+  "description": "Draw.io exports via Puppeteer",
+  "keywords": [
+    "drawio",
+    "export"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/LukeCarrier/drawio-export-puppeteer",
+  "bugs": "https://github.com/LukeCarrier/drawio-export-puppeteer/issues",
+  "repository": "github:LukeCarrier/drawio-export-puppeteer",
+  "author": "Luke Carrier <luke@carrier.im>",
+  "main": "index.js",
+  "dependencies": {
+  }
+}
