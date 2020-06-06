@@ -6,6 +6,7 @@ const EXPORT_URL = 'file://' + path.join(__dirname, 'export.html');
 const RESULT_INFO_SELECTOR = '#result-info';
 const FORMATS = [
   'jpg',
+  'png',
 ];
 
 async function launchExporter(timeout=30000) {
@@ -89,6 +90,7 @@ async function exportDiagram(input, pageIndex, format) {
   switch (format) {
     // Have Puppeteer screenshot them for us
     case 'jpg':
+    case 'png':
       return exportViaScreenshot(input, pageIndex, format);
 
     default:
