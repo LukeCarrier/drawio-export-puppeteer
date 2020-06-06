@@ -62,10 +62,9 @@
           'svg',
         ];
 
-        console.debug('Rendering page', pageIndex, 'of input', input, 'as', format);
+        console.debug('Rendering page', pageIndex, 'as', format);
 
         function initializeGraph(body) {
-          console.debug('Initialising empty document');
           document.body.innerHTML = '';
           const container = document.createElement('div');
           container.id = 'graph';
@@ -73,7 +72,6 @@
           container.style.height = '100%';
           body.appendChild(container);
 
-          console.debug('Initialising empty graph');
           const graph = new Graph(container);
           graph.setEnabled(false);
           graph.foldingEnabled = false;
@@ -82,8 +80,6 @@
         }
 
         function monkeypatchGraph(graph) {
-          console.debug('Monkey patching mxGraph to disable custom links');
-
           const graphGetLinkForCell = graph.getLinkForCell;
           graph.getLinkForCell = function(cell) {
             const link = graphGetLinkForCell.apply(this, arguments);
@@ -109,24 +105,9 @@
               }
             }
           };
-
-          // Fits the number of background pages to the graph
-          if (false /* PDF specific */) {
-            graph.view.getBackgroundPageBounds = function() {
-              var layout = this.graph.getPageLayout();
-              var page = this.graph.getPageSize();
-
-              return new mxRectangle(
-                  this.scale * (this.translate.x + layout.x * page.width),
-                  this.scale * (this.translate.y + layout.y * page.height),
-                  this.scale * layout.width * page.width,
-                  this.scale * layout.height * page.height);
-            };
-          }
         }
 
         function parseInput(input) {
-          console.debug('Parsing input')
           const doc = mxUtils.parseXml(input);
 
           const node = Editor.extractGraphModel(doc.documentElement, true);
@@ -143,8 +124,6 @@
           const codec = new mxCodec(xmlDoc);
           const model = graph.getModel();
           codec.decode(xmlDoc.documentElement, model);
-
-          console.debug('decoded graph doc into model', model);
         }
 
         function normalizeBackgroundColor(xmlDoc, format) {
@@ -165,18 +144,10 @@
 
         function scaleGraph(graph) {
           const bounds = graph.getGraphBounds();
-          const pageWidth = 800
-          let scale;
+          let scale = 1;
 
-          if (bounds.width < pageWidth & bounds.height < 1.5 * pageWidth) {
-            scale = 4;
-          } else if (bounds.width < 2 * pageWidth & bounds.height < 3 * pageWidth) {
-            scale = 3;
-          } else if (bounds.width < 4 * pageWidth && bounds.height < 6 * pageWidth) {
-            scale = 2;
-          }
-
-          graph.view.scaleAndTranslate(scale, Math.floor(bounds.x), Math.floor(bounds.y));
+          graph.view.scaleAndTranslate(
+              scale, -Math.floor(bounds.x), -Math.floor(bounds.y));
 
           return {bounds, scale};
         }
@@ -188,7 +159,7 @@
 
           document.body.style.backgroundColor = normalizeBackgroundColor(xmlDoc, format);
           const {bounds, scale} = scaleGraph(graph);
-          console.debug('graph reported bounds', bounds, 'and scale', scale);
+
           return {bounds, scale};
         }
 
