@@ -13,5 +13,7 @@
   "author": "Luke Carrier <luke@carrier.im>",
   "main": "index.js",
   "dependencies": {
+    "arg": "^4.1.3",
+    "console-inject": "^1.0.8"
   }
 }
