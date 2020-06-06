@@ -1,8 +1,14 @@
+#!/usr/bin/env node
+
 const fs = require('fs').promises;
 
 require('console-inject');
-const arg = require('arg');
-const exportDiagram = require('./index');
+
+const {
+  RECOVERABLE_ERRORS, parseArgs, generateHelp,
+  handleRejection,
+  exportDiagram,
+} = require('../index');
 
 // Options are modelled after the Draw.io Desktop CLI; ideally we should be a
 // 1:1 substitute.
@@ -33,48 +39,6 @@ const ARG_SPEC = {
   },
 };
 
-function handleRejection(action) {
-  return function(e) {
-    console.error(`${action} failed with`, e);
-  };
-}
-
-function parseArgs(argSpec) {
-  const args = {};
-  Object.values(argSpec).forEach(arg => {
-    args[arg.long] = arg.type;
-    args[arg.short] = arg.long;
-  });
-
-  const values = arg(args);
-
-  const result = {};
-  for (const [name, arg] of Object.entries(argSpec)) {
-    if (!(arg.long in values)) {
-      const e = new Error(`Missing required option: ${arg.long}`);
-      e.code = 'ARG_MISSING_REQUIRED';
-      throw e;
-    }
-
-    result[name] = values[arg.long];
-  }
-  return result;
-}
-
-function generateHelp(argSpec) {
-  const lines = [
-    'exporter [options]',
-    '',
-    'Options:',
-  ];
-
-  for (const [name, arg] of Object.entries(argSpec)) {
-    lines.push(`  ${arg.short}, ${arg.long} <${name} (${arg.type.name})>    ${arg.description}`);
-  }
-
-  return lines.join("\n");
-}
-
 try {
   const {input, pageIndex, output, format} = parseArgs(ARG_SPEC);
 
@@ -84,7 +48,7 @@ try {
     .catch(handleRejection('exporting'))
     .then(result => fs.writeFile(output, result));
 } catch (e) {
-  if (['ARG_UNKNOWN_OPTION', 'ARG_MISSING_REQUIRED'].includes(e.code)) {
+  if (RECOVERABLE_ERRORS.includes(e.code)) {
     console.error(e.message);
     process.stderr.write(generateHelp(ARG_SPEC));
     process.exit(1);
