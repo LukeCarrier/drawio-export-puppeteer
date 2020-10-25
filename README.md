@@ -13,3 +13,17 @@ After cloning, make sure you get the vendored dependencies:
 ```console
 git submodule update --init
 ```
+
+## Testing
+
+Tests are written in [Jest](https://jestjs.io/). To run them:
+
+```console
+yarn test
+```
+
+Add the `--watch` parameter to re-run the tests when changes are detected:
+
+```console
+yarn test --watch
+```
