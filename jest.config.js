@@ -1,9 +1,5 @@
 module.exports = {
-  'setupFilesAfterEnv': [
-    '<rootDir>/jest.setup.js',
-  ],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 
-  'reporters': [
-    'default',
-  ],
+  reporters: ["default"],
 };
