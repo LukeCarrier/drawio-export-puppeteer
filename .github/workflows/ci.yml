@@ -9,7 +9,7 @@ on:
     - master
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     strategy:
@@ -55,6 +55,9 @@ jobs:
 
     - name: Run tests
       run: yarn test
+
+    - name: Lint
+      run: yarn prettier --check .
 
     - name: Publish image snapshot diffs
       if: failure()
