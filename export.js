@@ -2,6 +2,12 @@
 const TRANSPARENT_COLORS = ["", "none"];
 const TRANSPARENT_FORMATS = ["png", "svg"];
 
+const BORDER = 2;
+
+const XML_PROLOG = '<?xml version="1.0" encoding="UTF-8"?>';
+const SVG_DOCTYPE =
+  '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+
 function initializeGraph(document) {
   document.body.innerHTML = "";
   const container = document.createElement("div");
@@ -105,7 +111,7 @@ function renderPage(document, xmlDoc, format) {
   );
   const { bounds, scale } = scaleGraph(graph);
 
-  return { bounds, scale };
+  return { bounds, scale, graph };
 }
 
 function writeResultInfo(document, pageCount, pageId, bounds, scale) {
@@ -137,6 +143,30 @@ function render(input, pageIndex, format) {
   const diagramXmlDoc = diagramNode.ownerDocument;
   const diagramId = diagrams[pageIndex].getAttribute("id");
 
-  const { bounds, scale } = renderPage(document, diagramXmlDoc, format);
+  const { bounds, scale, graph } = renderPage(document, diagramXmlDoc, format);
   writeResultInfo(document, diagrams.length, diagramId, bounds, scale);
+
+  return graph;
+}
+
+// Exposed for Puppeteer
+function exportSvg(graph, scale) {
+  const background = graph.background;
+  if (background == mxConstants.NONE) {
+    background = null;
+  }
+
+  const svgRoot = graph.getSvg(
+    background,
+    scale,
+    BORDER,
+    false,
+    null,
+    true,
+    null,
+    null,
+    null
+  );
+  const svg = XML_PROLOG + SVG_DOCTYPE + mxUtils.getXml(svgRoot);
+  return svg;
 }

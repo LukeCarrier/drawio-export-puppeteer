@@ -29,7 +29,10 @@ describe("export", () => {
 
     await page.evaluate(
       (renderArgs) => {
-        render(...renderArgs);
+        // The drawio Graph object returned by render() isn't serialisable, so
+        // we can't easily transfer it across the browser-Puppeteer boundary for
+        // later operations. Store it in the browser's global scope for later.
+        window.testGraph = render(...renderArgs);
       },
       [input.toString(), pageIndex, format]
     );
@@ -60,5 +63,16 @@ describe("export", () => {
     await render("flowchart.drawio", 1, "png");
 
     expect(await page.screenshot()).toMatchImageSnapshot();
+  });
+
+  it("exports the first page of the flowchart fixture to SVG", async () => {
+    expect.assertions(1);
+
+    await render("flowchart.drawio", 0, "svg");
+    const svg = await page.evaluate(() => {
+      return exportSvg(window.testGraph);
+    });
+
+    expect(svg).toMatchSnapshot();
   });
 });
