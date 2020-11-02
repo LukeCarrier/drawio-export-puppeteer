@@ -38,6 +38,17 @@ describe("export", () => {
     );
   }
 
+  async function initEditor(inputFilename, pageIndex, format) {
+    const input = await fs.readFile(path.join(FIXTURES, inputFilename));
+
+    page.evaluate(
+      (initArgs) => {
+        window.testEditorUi = initEditor(...initArgs);
+      },
+      [input.toString(), pageIndex, format]
+    );
+  }
+
   it("exports the first page of the flowchart fixture to JPEG", async () => {
     expect.assertions(1);
 
@@ -74,5 +85,16 @@ describe("export", () => {
     });
 
     expect(svg).toMatchSnapshot();
+  });
+
+  it("exports the first page of the flowchart fixture to VSDX", async () => {
+    expect.assertions(1);
+
+    await initEditor("flowchart.drawio", 0, "vsdx");
+    const vsdx = await page.evaluate(() => {
+      return exportVsdx(window.testEditorUi);
+    });
+
+    expect(Buffer.from(vsdx).toString("base64")).toMatchSnapshot();
   });
 });

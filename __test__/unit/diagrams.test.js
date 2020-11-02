@@ -5,6 +5,24 @@ const {
   exportViaScreenshot,
 } = require("../../lib/diagrams");
 
+function commonBrowserCloseTests() {
+  it("closes the browser without invoking the timeout callback", async () => {
+    expect.assertions(3);
+
+    const timeoutCallback = jest.fn();
+
+    const exporter = await launchExporter({
+      timeout: 500,
+      timeoutCallback: timeoutCallback,
+    });
+    await exportViaScreenshot(exporter, Buffer.from([]), 0, "png");
+
+    expect(exporter.browser.close).toHaveBeenCalledTimes(1);
+    expect(clearTimeout).toHaveBeenCalledWith(exporter.browserTimeout);
+    expect(timeoutCallback).toHaveBeenCalledTimes(0);
+  });
+}
+
 jest.mock("puppeteer", () => {
   const puppeteer = jest.requireActual("puppeteer");
 
@@ -123,21 +141,11 @@ describe("exportViaScreenshot", () => {
     });
   });
 
-  it("closes the browser without invoking the timeout callback", async () => {
-    expect.assertions(3);
+  commonBrowserCloseTests();
+});
 
-    const timeoutCallback = jest.fn();
-
-    const exporter = await launchExporter({
-      timeout: 500,
-      timeoutCallback: timeoutCallback,
-    });
-    await exportViaScreenshot(exporter, Buffer.from([]), 0, "png");
-
-    expect(exporter.browser.close).toHaveBeenCalledTimes(1);
-    expect(clearTimeout).toHaveBeenCalledWith(exporter.browserTimeout);
-    expect(timeoutCallback).toHaveBeenCalledTimes(0);
-  });
+describe("exportVsdx", () => {
+  commonBrowserCloseTests();
 });
 
 describe("exportDiagram", () => {

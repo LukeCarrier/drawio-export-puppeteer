@@ -50,6 +50,12 @@ function monkeypatchGraph(graph) {
   };
 }
 
+function monkeypatchEditor() {
+  EditorUi.prototype.createUi = () => {};
+  EditorUi.prototype.addTrees = () => {};
+  EditorUi.prototype.updateActionStates = () => {};
+}
+
 function parseInput(input) {
   const doc = mxUtils.parseXml(input);
 
@@ -149,6 +155,19 @@ function render(input, pageIndex, format) {
   return graph;
 }
 
+function initEditor(input, pageIndex, format) {
+  const { xmlDoc: rootXmlDoc } = parseInput(input);
+  const xml = mxUtils.getXml(rootXmlDoc);
+
+  const editorUi = new EditorUi();
+  const tmpFile = new LocalFile(editorUi, xml);
+  editorUi.setCurrentFile(tmpFile);
+  editorUi.setFileData(xml);
+  editorUi.selectPage(pageIndex);
+
+  return editorUi;
+}
+
 // Exposed for Puppeteer
 function exportSvg(graph, scale) {
   const background = graph.background;
@@ -169,4 +188,15 @@ function exportSvg(graph, scale) {
   );
   const svg = XML_PROLOG + SVG_DOCTYPE + mxUtils.getXml(svgRoot);
   return svg;
+}
+
+function exportVsdx(editorUi) {
+  return new Promise((resolve, reject) => {
+    editorUi.saveData = (filename, format, data, mimeType, base64Encoded) => {
+      resolve(Base64.decode(data));
+    };
+    editorUi.handleError = reject;
+
+    editorUi.exportVisio(true);
+  });
 }
