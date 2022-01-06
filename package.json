@@ -1,6 +1,6 @@
 {
   "name": "drawio-export-puppeteer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Draw.io exports via Puppeteer",
   "keywords": [
     "drawio",
